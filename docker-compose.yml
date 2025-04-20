@@ -1,0 +1,11 @@
+version: "3.8"
+
+services:
+  pytest-allure:
+    build:
+      context: .
+    container_name: pytest-allure
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app

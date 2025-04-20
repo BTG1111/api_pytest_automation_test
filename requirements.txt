@@ -1,0 +1,5 @@
+allure-pytest == 2.13.2
+allure-combine == 1.0.11
+pytest == 7.4.2
+requests == 2.32.3
+urllib3 == 2.2.2
