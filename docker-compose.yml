@@ -4,8 +4,13 @@ services:
   pytest-allure:
     build:
       context: .
+      dockerfile: Dockerfile
     container_name: pytest-allure
     ports:
       - "8000:8000"
     volumes:
-      - .:/app
+      - pytest_app_data:/app
+    command: tail -f /dev/null
+
+volumes:
+  pytest_app_data:
