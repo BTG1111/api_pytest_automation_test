@@ -12,14 +12,17 @@ It uses Docker / Docker Compose to easily create a consistent testing environmen
 ├── api_requests
 │   └── list_users.py
 │   └── single_user.py
+├── configuration
+│   └── Dockerfile
 ├── log/
-│   └── api_test.log
+│   └── api_test.log (auto-generated)
 ├── tests/
 │   └── test_list_users.py
 │   └── test_single_user.py
 ├── .gitignore
 ├── base_api.py
 ├── config
+├── conftest
 ├── docker-compose.yml
 ├── Dockerfile
 ├── README.md
@@ -29,7 +32,7 @@ It uses Docker / Docker Compose to easily create a consistent testing environmen
 
 ## 🛠 Installation and Usage
 
-1. Install Docker & Docker Compose
+### Install Docker & Docker Compose
 
 Please install:
 1. [Docker Desktop](https://www.docker.com/) 
@@ -37,11 +40,11 @@ Please install:
 
 ---
 
-2. Method 1: Using standalone Docker commands
+## Method 1: Using standalone Docker commands
 
 Build Docker Image
 ```bash
-docker build -t pytest-allure .
+docker build -t pytest-allure -f configuration/Dockerfile .
 ```
 
 Run the Container and View the Report
@@ -60,51 +63,65 @@ You will see the Allure report generated from the test results.
 
 --- 
 
-3. Method 2: Using docker-compose
+## Method 2: Pytest + Allure Report CI/CD with Jenkins (Docker)
 
-To simplify container management, you can use docker-compose.
+Below steps demonstrate how to use Jenkins (Dockerized) to run Pytest tests and generate an Allure Report.
 
-Build & Run:
+
+### Workflow Overview:
+1. Set up a Jenkins Docker container
+2. Install required plugins (Pipeline, Allure, etc.)
+3. Create a Jenkins pipeline job (with SCM integration)
+4. Jenkins checks out the project code
+5. Start the test environment using docker-compose
+6. Run pytest inside the container
+7. Generate Allure test results
+8. View the Allure Report from Jenkins
+
+### Step-by-Step Instructions
+
+#### 1. Set Up Jenkins in Docker
 ```bash
-docker-compose up --build
+docker pull jenkins/jenkins:lts
+
+docker run -d --name jenkins \
+  -u root \
+  -p 8080:8080 \
+  -p 50000:50000 \
+  -v jenkins_home:/var/jenkins_home \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  jenkins/jenkins:lts
 ```
-This will:
-- Automatically build the Docker image
-- Start the container
-- Run pytest tests
-- Generate the Allure report
-- Serve the report on port 8000
+🚀 Notes
+- -v /var/run/docker.sock allows Jenkins container to control the Docker daemon.
+- Access Jenkins UI at http://localhost:8080
+- Jenkins data persists under jenkins_home.
 
-Then open:
-```bash
-http://localhost:8000
-```
-to view the test report.
+#### 2. Install Required Jenkins Plugins
 
-To stop the container, press Ctrl+C, then clean up:
-```bash
-docker-compose down
-```
----
-# 🐳 Dockerfile Overview
-- Based on python:3.12-bullseye official image
-- Installs Python dependencies
-- Installs Allure CLI (for report generation)
--Default container behavior:
-  1.	Run pytest tests and save raw results
-  2.	Generate Allure HTML reports
-  3.	Start a simple Python HTTP server to serve the report
+Inside Jenkins UI → Manage Jenkins → Manage Plugins → Install:
+- Pipeline
+- Docker Pipeline
+- Allure Report Plugin
+- Git Plugin
 
-📄 docker-compose.yml Overview
+#### 3. Create a Jenkins Job
 
-Simplifies container build and run operations. Example content:
-```yaml
-version: '3'
-services:
-  pytest-allure:
-    build: .
-    ports:
-      - "8000:8000"
-    volumes:
-      - .:/app
- ```
+1. Create a new Pipeline job. 
+   - Name: `pytest-allure`  # you can enter any name you prefer
+   - Type: Pipeline
+2. Configure:
+   - Pipeline script from SCM
+   - Choose Git and enter your repository URL
+   - Branch Specifier: */main (or your branch)
+   - Script Path: Jenkinsfile
+
+#### 4. Start the Test Execution
+
+In Jenkins, simply click Build Now.
+Wait for the pipeline to complete.
+
+#### 5. View the Allure Report
+- Go to your Jenkins job.
+- Click on the Allure Report link on the left sidebar.
+- View your test results beautifully presented!
