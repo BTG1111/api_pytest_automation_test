@@ -35,10 +35,6 @@ pipeline {
                         docker compose down || true
                         docker compose up -d --build
                     """
-                    echo 'echo "Workspace content after docker-compose up:"'
-                    sh 'ls -alh /var/jenkins_home/workspace/Pytest-Allure'
-                    sh "${DOCKER_COMPOSE_CMD} exec pytest-allure ls -alh /app"
-
                 }
             }
         }
@@ -49,6 +45,15 @@ pipeline {
                     echo 'Copying workspace content to the container...'
                     sh "docker cp ${WORKSPACE_DIR}/. pytest-allure:/app"
                 }
+            }
+        }
+
+        stage('Run Pytest and Generate Allure Report') {
+            steps {
+                script {
+                    echo 'Running pytest inside container...'
+                    sh "${DOCKER_COMPOSE_CMD} exec pytest-allure pytest tests/ --alluredir=./allure-results"
+                    }
             }
         }
 
@@ -76,15 +81,6 @@ pipeline {
                     echo 'Extracting Allure results archive in Jenkins workspace...'
                     sh 'tar -xzf allure-results.tar.gz'
                 }
-            }
-        }
-
-        stage('Run Pytest and Generate Allure Report') {
-            steps {
-                script {
-                    echo 'Running pytest inside container...'
-                    sh "${DOCKER_COMPOSE_CMD} exec pytest-allure pytest tests/ --alluredir=./allure-results"
-                    }
             }
         }
     }
