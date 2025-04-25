@@ -116,12 +116,19 @@ Inside Jenkins UI → Manage Jenkins → Manage Plugins → Install:
    - Branch Specifier: */main (or your branch)
    - Script Path: Jenkinsfile
 
-#### 4. Start the Test Execution
+#### 4. Configure Allure Commandline Tool in Jenkins
+After installing the Allure Report Plugin, you also need to configure the Allure Commandline tool:
+1. In Jenkins UI → Manage Jenkins → Global Tool Configuration 
+2. Find the section Allure Commandline 
+3. Click Add Allure Commandline 
+4. Set a name, for example: Allure
+
+#### 5. Start the Test Execution
 
 In Jenkins, simply click Build Now.
 Wait for the pipeline to complete.
 
-#### 5. View the Allure Report
+#### 6. View the Allure Report
 - Go to your Jenkins job.
 - Click on the Allure Report link on the left sidebar.
 - View your test results beautifully presented!
